@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>{$lang->pm_edit_history}</title>
+{$headerinclude}
+</head>
+<body>
+{$header}
+<table border="0" cellspacing="{$theme['borderwidth']}" cellpadding="{$theme['tablespace']}" class="tborder" width="100%">
+<tr>
+<td class="thead"><strong>{$lang->pm_edit_history}</strong></td>
+</tr>
+<tr>
+<td class="trow1">
+<div class="pm_edit_history_list">
+{$history_items}
+</div>
+</td>
+</tr>
+<tr>
+<td class="tfoot" align="center">
+<a href="private.php?action=read&amp;pmid={$pm['pmid']}">{$lang->pm_edit_back_to_pm}</a>
+</td>
+</tr>
+</table>
+{$footer}
+</body>
+</html>

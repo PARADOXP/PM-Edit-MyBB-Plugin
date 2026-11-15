@@ -1,0 +1,206 @@
+<a href="private.php?action=editpm&amp;pmid={$post['pmid']}" id="edit_pm_{$post['pmid']}" class="postbit_pm_edit_button popup_menu_button" title="{$lang->postbit_edit}">
+    <span>{$lang->pm_edit_button}</span>
+</a>
+<div id="edit_pm_{$post['pmid']}_popup" class="popup_menu" style="display: none;">
+    <div class="popup_item_container">
+        <a href="javascript:void(0)" class="popup_item quick_edit_pm_button" id="quick_edit_pm_{$post['pmid']}">{$lang->postbit_quick_edit}</a>
+    </div>
+    <div class="popup_item_container">
+        <a href="private.php?action=editpm&amp;pmid={$post['pmid']}" class="popup_item">{$lang->postbit_full_edit}</a>
+    </div>
+</div>
+<script type="text/javascript">
+$(function() {
+    $("#edit_pm_{$post['pmid']}").popupMenu();
+    
+    // Quick edit PM handler
+    $("#quick_edit_pm_{$post['pmid']}").on("click", function(e) {
+        e.preventDefault();
+        
+        var pmid = {$post['pmid']};
+        
+        // Find the message body - look inside .post_content which contains the message
+        var pmContainer = $("#edit_pm_" + pmid).closest(".post_content");
+        var pm_body = pmContainer.find(".post_body");
+        
+        if(pm_body.length == 0) {
+            pm_body = pmContainer.find(".post_content");
+        }
+        
+        if(pm_body.length == 0) {
+            pm_body = $(".post_body");
+        }
+        
+        if(pm_body.length == 0) {
+            $.jGrowl("Could not find message container", {theme:'jGrowl_error'});
+            return;
+        }
+        
+        // Get current message content
+        $.ajax({
+            url: "xmlhttp.php?action=quick_edit_pm&do=get_pm&pmid=" + pmid + "&my_post_key={$mybb->post_code}",
+            type: "GET",
+            dataType: "json",
+            success: function(response) {
+                var currentMessage = response;
+                
+                // Create form wrapper
+                var form = $('<form id="quickedit_form_' + pmid + '"></form>');
+                
+                // Create editable textarea
+                var textareaWidth = pm_body.width() > 0 ? pm_body.width() - 20 : '100%';
+                var textarea = $('<textarea></textarea>').attr({
+                    id: 'quickedit_pm_' + pmid,
+                    name: 'value',
+                    rows: 12
+                }).addClass('textbox').css('width', textareaWidth).val(currentMessage);
+                
+                // Create edit reason field
+                var editReasonDiv = $('<div></div>').addClass('editreason').attr('id', 'editreason_' + pmid);
+                editReasonDiv.append('<label for="editreason">{$lang->pm_edit_reason}</label> ');
+                var editReasonInput = $('<input type="text"></input>').attr({
+                    id: 'quickedit_pm_' + pmid + '_editreason',
+                    name: 'editreason',
+                    class: 'textbox',
+                    size: 40,
+                    maxlength: 150
+                }).css('margin', '6px 0');
+                editReasonDiv.append(editReasonInput).append('<br>');
+                
+                // Create buttons
+                var buttonContainer = $('<div></div>').css('margin-top', '10px');
+                var saveBtn = $('<input type="button"></input>').attr({
+                    value: "Save Changes",
+                    class: 'button'
+                });
+                var cancelBtn = $('<input type="button"></input>').attr({
+                    value: "Cancel Edit",
+                    class: 'button'
+                });
+                
+                buttonContainer.append(saveBtn).append(' ').append(cancelBtn);
+                
+                // Append all to form
+                form.append(textarea);
+                form.append(editReasonDiv);
+                form.append(buttonContainer);
+                
+                // Replace message content with form
+                var originalContent = pm_body.html(); // Save original for reference
+
+                // Add unique ID to the container for direct targeting
+                var pmBodyId = 'pm_body_' + pmid;
+                pm_body.attr('id', pmBodyId);
+
+                pm_body.html(form);
+                
+                // Initialize SCEditor if available
+                if(typeof quickedit_opt_editor !== 'undefined' && typeof $.fn.sceditor !== 'undefined') {
+                    var editorConfig = $.extend({}, quickedit_opt_editor);
+                    editorConfig.height = editorConfig.height || 250;
+                    $('#quickedit_pm_' + pmid).sceditor(editorConfig);
+                }
+                
+                // Handle cancel button
+                cancelBtn.on('click', function() {
+                    // Destroy SCEditor if it exists
+                    try {
+                        var editor = $('#quickedit_pm_' + pmid).sceditor('instance');
+                        if(editor) {
+                            editor.destroy();
+                        }
+                    } catch(e) {}
+                    
+                    // Restore original message
+                    $.ajax({
+                        url: "xmlhttp.php?action=quick_edit_pm&do=get_pm&pmid=" + pmid + "&my_post_key={$mybb->post_code}",
+                        type: "GET",
+                        dataType: "json",
+                        success: function(originalResponse) {
+                            pm_body.html(originalResponse);
+                        }
+                    });
+                });
+                
+                // Handle save button
+                saveBtn.on('click', function() {
+                    // Update SCEditor content if it exists
+                    try {
+                        var editor = $('#quickedit_pm_' + pmid).sceditor('instance');
+                        if(editor) {
+                            editor.updateOriginal();
+                        }
+                    } catch(e) {}
+                    
+                    var newMessage = textarea.val();
+                    var editReason = editReasonInput.val();
+
+                    saveBtn.attr('disabled', 'disabled').val('Saving...');
+
+                    $.ajax({
+                        url: "xmlhttp.php?action=quick_edit_pm&do=update_pm&pmid=" + pmid + "&my_post_key={$mybb->post_code}",
+                        type: "POST",
+                        dataType: "json",
+                        data: {
+                            value: newMessage,
+                            editreason: editReason
+                        },
+                        success: function(jsonResponse) {
+                            console.log("Save response:", jsonResponse);
+                            if(jsonResponse.errors) {
+                                $.jGrowl(jsonResponse.errors, {theme:'jGrowl_error'});
+                                saveBtn.removeAttr('disabled').val("Save Changes");
+                            } else {
+                                // Use the unique ID to find and update the message container
+                                var pmBodyId = 'pm_body_' + pmid;
+                                var messageDiv = $('#' + pmBodyId);
+
+                                if(messageDiv.length > 0) {
+                                    // Replace the form with the parsed message
+                                    messageDiv.html(jsonResponse.message);
+                                }
+
+                                // Update or add the "edited by" message
+                                if(jsonResponse.editedmsg) {
+                                    var editedById = 'edited_by_' + pmid;
+                                    var editedByDiv = $('#' + editedById);
+                                    if(editedByDiv.length === 0) {
+                                        // Create new edited by message after the post body
+                                        messageDiv.after('<div id="' + editedById + '" class="edited_post">' + jsonResponse.editedmsg + '</div>');
+                                    } else {
+                                        // Update existing edited by message
+                                        editedByDiv.html(jsonResponse.editedmsg);
+                                    }
+                                }
+
+                                // Add edit history link if provided and doesn't exist
+                                if(jsonResponse.historylink) {
+                                    var historyLinkId = 'pm_edit_history_' + pmid;
+                                    var existingHistoryLink = $('#' + historyLinkId);
+                                    if(existingHistoryLink.length === 0) {
+                                        // Insert after the edit button
+                                        var editButton = $('#edit_pm_' + pmid);
+                                        if(editButton.length > 0) {
+                                            editButton.after(jsonResponse.historylink);
+                                        }
+                                    }
+                                }
+
+                                $.jGrowl("Message updated successfully", {theme:'jGrowl_success'});
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.log("Save error:", status, error);
+                            $.jGrowl("Error saving message: " + status, {theme:'jGrowl_error'});
+                            saveBtn.removeAttr('disabled').val("Save Changes");
+                        }
+                    });
+                });
+            },
+            error: function() {
+                $.jGrowl("Error loading message", {theme:'jGrowl_error'});
+            }
+        });
+    });
+});
+</script>

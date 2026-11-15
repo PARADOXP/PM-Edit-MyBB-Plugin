@@ -1,0 +1,100 @@
+{
+  "group": {
+    "name": "pm_edit",
+    "title": "PM Edit Settings",
+    "description": "Settings for the PM Edit plugin."
+  },
+  "settings": {
+    "enabled": {
+      "title": "Enable PM Editing",
+      "description": "Enable or disable the PM editing feature globally.",
+      "optionscode": "yesno",
+      "value": "1",
+      "disporder": 1
+    },
+    "edittimelimit": {
+      "title": "Edit Time Limit",
+      "description": "Number of minutes after receiving/sending a PM that users can still edit it. Set to 0 for unlimited time.",
+      "optionscode": "numeric",
+      "value": "60",
+      "disporder": 2
+    },
+    "allowed_groups": {
+      "title": "Allowed Usergroups",
+      "description": "Select which usergroups can edit their private messages.",
+      "optionscode": "groupselect",
+      "value": "2,3,4,6",
+      "disporder": 3
+    },
+    "allow_edit_received": {
+      "title": "Allow Editing Received PMs",
+      "description": "Allow users to edit PMs they have received. If disabled, users can only edit PMs they have sent.",
+      "optionscode": "yesno",
+      "value": "1",
+      "disporder": 4
+    },
+    "allow_edit_sent": {
+      "title": "Allow Editing Sent PMs",
+      "description": "Allow users to edit PMs they have sent. Note: This only affects the sender's copy of the PM.",
+      "optionscode": "yesno",
+      "value": "1",
+      "disporder": 5
+    },
+    "hard_edit_sent": {
+      "title": "Allow Hard Editing Sent PMs",
+      "description": "When enabled, editing a sent PM will also edit the recipient's copy. This is useful for moderators to correct messages.",
+      "optionscode": "yesno",
+      "value": "0",
+      "disporder": 5
+    },
+    "hard_edit_sent_groups": {
+      "title": "Hard Edit Allowed Usergroups",
+      "description": "Select which usergroups can use hard editing (editing recipient's copy).",
+      "optionscode": "groupselect",
+      "value": "3,4,6",
+      "disporder": 5
+    },
+    "track_edits": {
+      "title": "Track Edit History",
+      "description": "Enable to keep a history of all PM edits. This allows users to view previous versions of edited PMs.",
+      "optionscode": "yesno",
+      "value": "1",
+      "disporder": 6
+    },
+    "show_edit_notice": {
+      "title": "Show Edit Notice",
+      "description": "Display a notice on edited PMs showing when and by whom the PM was last edited.",
+      "optionscode": "yesno",
+      "value": "1",
+      "disporder": 7
+    },
+    "allow_edit_reason": {
+      "title": "Allow Edit Reason",
+      "description": "Allow users to provide a reason for editing their PMs.",
+      "optionscode": "yesno",
+      "value": "1",
+      "disporder": 8
+    },
+    "max_edit_history": {
+      "title": "Max Edit History Entries",
+      "description": "Maximum number of edit history entries to keep per PM. Set to 0 for unlimited. Older entries will be deleted.",
+      "optionscode": "numeric",
+      "value": "10",
+      "disporder": 9
+    },
+    "exclude_folders": {
+      "title": "Excluded Folders",
+      "description": "Comma-separated list of folder IDs where PM editing is not allowed. Default: 3 (Drafts), 4 (Trash)",
+      "optionscode": "text",
+      "value": "3,4",
+      "disporder": 10
+    },
+    "quick_sceditor": {
+      "title": "Use Editor in Quick Edit",
+      "description": "Enable to use the full BBCode editor in PM quick edit instead of plain textarea.",
+      "optionscode": "yesno",
+      "value": "1",
+      "disporder": 11
+    }
+  }
+}
