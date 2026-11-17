@@ -2,6 +2,10 @@
 
 Adds an edit button to private messages. Users can edit the messages they sent and the messages they received, with an optional reason, a side-by-side edit history and an Admin CP log viewer.
 
+<p align="center">
+  <img src=".github/pm-edit-cover.svg" alt="PM Edit for MyBB cover" width="1100">
+</p>
+
 - **Version:** 1.2.1 in `_info()`, 1.1.0 in the file header
 - **Codename:** `pm_edit`
 - **Compatibility:** MyBB 1.8.x (`18*`)
